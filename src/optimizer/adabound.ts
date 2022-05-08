@@ -19,9 +19,6 @@ export function AdaBound({
   epsilon?: number
 }) {
   let t = 1
-  let etaL = 0
-  let etaU = 1e10
-  let beta1t = beta1
   const bank = [
     ...map(
       targets,
@@ -34,6 +31,10 @@ export function AdaBound({
   ]
 
   return function* () {
+    const beta1t = beta1 / t
+    const etaL = 0.1 - 0.1 / ((1 - beta2) * t + 1)
+    const etaU = 0.1 + 0.1 / ((1 - beta2) * t)
+
     let i = 0
     for (const { x, gx } of targets) {
       const state = bank[i++]
@@ -54,8 +55,6 @@ export function AdaBound({
       yield Vector.sub(x, Vector.mul(eta, state.m))
     }
 
-    etaL = 0.1 - 0.1 / ((1 - beta2) * t + 1)
-    etaU = 0.1 + 0.1 / ((1 - beta2) * t)
     t++
   }
 }
